@@ -225,7 +225,10 @@ export function createPrototype(host){const env=createEnvironment("<!DOCTYPE htm
                     status: 'timeout', statusText: '已超时', checkinTime: null, checkoutTime: null,
                     createTime: '2026-07-20 16:00:00' }
             ];
-            return result.concat(memoryReservations);
+            var merged = {};
+            result.forEach(function(item) { merged[item.id] = item; });
+            memoryReservations.forEach(function(item) { if (item && item.id) merged[item.id] = item; });
+            return Object.keys(merged).map(function(id) { return merged[id]; });
         }
         let memoryReservations = [];
 
@@ -1726,8 +1729,9 @@ export function createPrototype(host){const env=createEnvironment("<!DOCTYPE htm
                     r.status = 'completed';
                     r.statusText = '已结束';
                     r.checkoutTime = new Date().toISOString().replace('T', ' ').slice(0, 19);
+                    memoryReservations.push(r);
                 }
-                memoryReservations.push(r);
+                updateReserveCount();
                 renderContentReserve();
                 showNotice('已提前释放工位', '提示');
             });
