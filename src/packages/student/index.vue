@@ -1,0 +1,3 @@
+<template><view :style="{paddingTop:safeTop+'px'}"><view v-if="loading" class="loading">正在加载…</view><view v-if="failed" class="error">{{failed}}</view><NativeNode v-if="tree" :node="tree" @action="action"/></view></template>
+<script>import NativeNode from '../../components/NativeNode.vue';import {nativePage} from '../../runtime/page.js';import {createPrototype} from './student.js';import rules from './student.styles.json';export default {...nativePage(createPrototype,rules,'student'),components:{NativeNode}}</script>
+<style>.loading,.error{padding:24px;text-align:center}.error{color:#dc2626}</style>

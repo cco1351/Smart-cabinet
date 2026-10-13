@@ -1,0 +1,12 @@
+{
+  "pages": [
+    {"path":"pages/entry/index","style":{"navigationBarTitleText":"实验室智能柜"}},
+    {"path":"pages/login/index","style":{"navigationBarTitleText":"登录"}},
+    {"path":"pages/password/index","style":{"navigationBarTitleText":"账号与安全"}}
+  ],
+  "subPackages": [
+    {"root":"packages/student","pages":[{"path":"index","style":{"navigationStyle":"custom","disableScroll":true}}]},
+    {"root":"packages/teacher","pages":[{"path":"index","style":{"navigationStyle":"custom","disableScroll":true}},{"path":"power-admin","style":{"navigationStyle":"custom"}},{"path":"power-approver","style":{"navigationStyle":"custom"}}]}
+  ],
+  "globalStyle":{"navigationBarTextStyle":"black","navigationBarBackgroundColor":"#ffffff","backgroundColor":"#f4f6fb","usingComponents":{"native-node":"/components/NativeNode"}}
+}

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>小程序管理端页面原型线框图</title>
+  <link rel="stylesheet" href="./css/小程序管理员端页面线框图.css">
+</head>
+<body>
+  <div class="workspace">
+    <div class="toolbar">
+      <div class="toolbar-title">
+        <strong>小程序管理端页面线框图</strong>
+        <span>同一小程序按登录角色展示不同功能入口。</span>
+      </div>
+      <div id="roleSwitch" class="role-strip"></div>
+    </div>
+    <main class="prototype-main">
+      <div id="roleSummary" class="role-summary"></div>
+      <div id="pageTabs" class="page-strip"></div>
+      <div id="appFrame"></div>
+    </main>
+  </div>
+  <script defer src="./js/小程序管理员端页面线框图.data.js"></script>
+  <script defer src="./js/小程序管理员端页面线框图.render.js"></script>
+  <script defer src="./js/小程序管理员端页面线框图.app.js"></script>
+</body>
+</html>

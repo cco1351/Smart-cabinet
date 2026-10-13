@@ -1,0 +1,6 @@
+{
+ "name":"实验室智能柜", "appid":"", "description":"学生与教师双角色智能柜小程序", "versionName":"1.0.0", "versionCode":"100", "transformPx":false,
+ "vueVersion":"3", "uniStatistics":{"enable":false},
+ "mp-weixin":{"appid":"wxbc86a5dc49311472","setting":{"urlCheck":false,"es6":true,"minified":true},"optimization":{"subPackages":true}},
+ "h5":{"title":"实验室智能柜","router":{"mode":"hash"}}
+}

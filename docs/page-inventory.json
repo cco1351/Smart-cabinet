@@ -1,0 +1,362 @@
+{
+  "student": [
+    {
+      "id": "home"
+    },
+    {
+      "id": "devices"
+    },
+    {
+      "id": "deviceDetail"
+    },
+    {
+      "id": "borrow"
+    },
+    {
+      "id": "pickup"
+    },
+    {
+      "id": "returns"
+    },
+    {
+      "id": "faultNew"
+    },
+    {
+      "id": "faultDetail"
+    },
+    {
+      "id": "messages"
+    },
+    {
+      "id": "orderRecords"
+    },
+    {
+      "id": "profile"
+    },
+    {
+      "id": "faultList"
+    },
+    {
+      "id": "organization"
+    },
+    {
+      "id": "reauth"
+    },
+    {
+      "id": "changePassword"
+    },
+    {
+      "id": "forgetPassword"
+    },
+    {
+      "id": "login"
+    },
+    {
+      "id": "credit"
+    },
+    {
+      "id": "creditRecords"
+    },
+    {
+      "id": "resources"
+    },
+    {
+      "id": "deviceResource"
+    },
+    {
+      "id": "safety"
+    },
+    {
+      "id": "deviceExam"
+    },
+    {
+      "id": "rfidExam"
+    },
+    {
+      "id": "systemExam"
+    },
+    {
+      "id": "reserveStep1"
+    },
+    {
+      "id": "reserveStep2"
+    },
+    {
+      "id": "reserveStep3"
+    }
+  ],
+  "teacher": [
+    {
+      "id": "01-home",
+      "title": "首页"
+    },
+    {
+      "id": "02-messages",
+      "title": "我的消息"
+    },
+    {
+      "id": "03-admin-borrow-return",
+      "title": "借用审核"
+    },
+    {
+      "id": "03-todo",
+      "title": "待办列表"
+    },
+    {
+      "id": "04-borrow-approval-detail",
+      "title": "借用审批详情"
+    },
+    {
+      "id": "05-return-review-detail",
+      "title": "归还审核详情"
+    },
+    {
+      "id": "07-order-detail",
+      "title": "订单详情"
+    },
+    {
+      "id": "08-device-list",
+      "title": "设备列表"
+    },
+    {
+      "id": "08a-add-device",
+      "title": "设备管理"
+    },
+    {
+      "id": "08f-device-stock",
+      "title": "设备管理"
+    },
+    {
+      "id": "08g-device-binding",
+      "title": "设备管理"
+    },
+    {
+      "id": "08h-add-device-info",
+      "title": "添加设备信息"
+    },
+    {
+      "id": "08i-edit-device-info",
+      "title": "编辑设备信息"
+    },
+    {
+      "id": "08j-device-stock-in",
+      "title": "设备入库"
+    },
+    {
+      "id": "08k-device-stock-in-result",
+      "title": "入库完成"
+    },
+    {
+      "id": "08l-device-stock-out",
+      "title": "设备出库"
+    },
+    {
+      "id": "08m-device-binding-detail",
+      "title": "信息绑定"
+    },
+    {
+      "id": "08b-device-category-measure",
+      "title": "电子测量仪器"
+    },
+    {
+      "id": "08c-device-category-sensor",
+      "title": "传感器套件"
+    },
+    {
+      "id": "08d-device-category-power",
+      "title": "电源设备"
+    },
+    {
+      "id": "08e-device-category-tool",
+      "title": "工具器材"
+    },
+    {
+      "id": "09-device-detail",
+      "title": "设备详情"
+    },
+    {
+      "id": "09b-rfid-device-detail",
+      "title": "设备详情"
+    },
+    {
+      "id": "09c-label-direct-device-detail",
+      "title": "设备详情"
+    },
+    {
+      "id": "09a-edit-device",
+      "title": "编辑信息绑定"
+    },
+    {
+      "id": "09d-edit-rfid-device",
+      "title": "编辑信息绑定"
+    },
+    {
+      "id": "09e-abnormal-device-detail",
+      "title": "设备详情"
+    },
+    {
+      "id": "10-cabinet-list",
+      "title": "柜机列表"
+    },
+    {
+      "id": "10a-add-cabinet",
+      "title": "添加柜机"
+    },
+    {
+      "id": "10b-bind-cabinet",
+      "title": "确认绑定柜机"
+    },
+    {
+      "id": "10c-cabinet-online",
+      "title": "柜机绑定完成"
+    },
+    {
+      "id": "11-cabinet-detail",
+      "title": "柜机详情：A 柜"
+    },
+    {
+      "id": "11b-label-cabinet-detail",
+      "title": "柜机详情：B 柜"
+    },
+    {
+      "id": "11c-label-cabinet-detail",
+      "title": "柜机详情：C 柜"
+    },
+    {
+      "id": "12-device-qr",
+      "title": "标签版取还码"
+    },
+    {
+      "id": "12-device-qr-direct",
+      "title": "标签版取还码"
+    },
+    {
+      "id": "17-admin-exception-process",
+      "title": "异常处理"
+    },
+    {
+      "id": "18-device-exception-report",
+      "title": "标记设备异常"
+    },
+    {
+      "id": "18-exception-detail",
+      "title": "设备异常详情"
+    },
+    {
+      "id": "18-cabinet-exception-report",
+      "title": "标记柜机异常"
+    },
+    {
+      "id": "18a-cabinet-exception-detail",
+      "title": "柜门异常详情"
+    },
+    {
+      "id": "18c-cabinet-exception-result",
+      "title": "柜机异常处理结果"
+    },
+    {
+      "id": "19-notice-list",
+      "title": "公告管理"
+    },
+    {
+      "id": "20-new-notice",
+      "title": "发布公告"
+    },
+    {
+      "id": "22-profile",
+      "title": "个人"
+    },
+    {
+      "id": "22a-account-security",
+      "title": "账号与安全"
+    },
+    {
+      "id": "22b-change-password",
+      "title": "修改密码"
+    },
+    {
+      "id": "role-admin-home",
+      "title": "管理首页"
+    },
+    {
+      "id": "09g-cabinet-device-detail",
+      "title": "设备详情"
+    },
+    {
+      "id": "06-device-borrow-history",
+      "title": "设备借还记录"
+    },
+    {
+      "id": "08k-device-stock-in-result",
+      "title": "入库完成"
+    },
+    {
+      "id": "08i-edit-device-info",
+      "title": "编辑设备信息"
+    },
+    {
+      "id": "08n-device-flow-setting",
+      "title": "分类规则设置"
+    },
+    {
+      "id": "08j-device-stock-in",
+      "title": "设备入库"
+    },
+    {
+      "id": "08l-device-stock-out",
+      "title": "设备出库"
+    },
+    {
+      "id": "24-organization-review",
+      "title": "组织审核"
+    },
+    {
+      "id": "24a-organization-application-detail",
+      "title": "申请人详情"
+    },
+    {
+      "id": "23-organization-members",
+      "title": "组织人员"
+    },
+    {
+      "id": "23b-add-organization-member",
+      "title": "添加人员"
+    },
+    {
+      "id": "23c-organization-candidate-detail",
+      "title": "人员详情"
+    },
+    {
+      "id": "23a-organization-member-detail",
+      "title": "成员详情"
+    }
+  ],
+  "powerAdmin": [
+    {
+      "id": "pg-stations"
+    },
+    {
+      "id": "pg-approval"
+    },
+    {
+      "id": "pg-manage"
+    },
+    {
+      "id": "pg-mine"
+    }
+  ],
+  "powerApprover": [
+    {
+      "id": "page-stations"
+    },
+    {
+      "id": "page-approval"
+    },
+    {
+      "id": "page-manage"
+    },
+    {
+      "id": "page-my"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "smart-cabinet-uniapp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:h5": "uni",
+    "build:h5": "uni build",
+    "dev:mp-weixin": "uni -p mp-weixin",
+    "build:mp-weixin": "uni build -p mp-weixin",
+    "test": "node --test tests/prototypes.test.mjs tests/auth-server.test.mjs tests/auth-client.test.mjs",
+    "server": "node server/index.mjs",
+    "account": "node server/accounts.mjs",
+    "test:weixin": "node tools/wechat-check.cjs",
+    "sync:github": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/hbuilder-github-sync.ps1"
+  },
+  "dependencies": {
+    "@dcloudio/uni-app": "3.0.0-5020620260917001",
+    "@dcloudio/uni-components": "3.0.0-5020620260917001",
+    "@dcloudio/uni-h5": "3.0.0-5020620260917001",
+    "@dcloudio/uni-mp-weixin": "3.0.0-5020620260917001",
+    "acorn": "8.15.0",
+    "linkedom": "0.18.12",
+    "vue": "3.4.21"
+  },
+  "devDependencies": {
+    "@dcloudio/types": "3.4.31",
+    "@dcloudio/vite-plugin-uni": "3.0.0-5020620260917001",
+    "@playwright/test": "^1.58.2",
+    "miniprogram-automator": "^0.12.1",
+    "postcss": "8.4.49",
+    "postcss-selector-parser": "6.1.2",
+    "vite": "5.2.8"
+  }
+}

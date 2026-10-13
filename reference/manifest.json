@@ -1,0 +1,42 @@
+[
+  {
+    "source": "D:/Desktop/研一/智能柜/小程序学生端/演示9.9.html",
+    "copy": "reference/student.html",
+    "sha256": "b0999bc02cae88ce2bb25b09dab5d82c5a57118aca9dfe87155fb59e3ba8ad9f"
+  },
+  {
+    "source": "D:/Desktop/研一/智能柜/小程序教师端/原型框图/小程序/小程序管理员端页面线框图.html",
+    "copy": "reference/teacher.html",
+    "sha256": "efb9d673cd1868f497a0ece351368b2616417d43f6f419194749c221cd702831"
+  },
+  {
+    "source": "D:/Desktop/研一/智能柜/小程序教师端/原型框图/小程序/css/小程序管理员端页面线框图.css",
+    "copy": "reference/teacher.css",
+    "sha256": "8f5dc030e9eba60a8470b852efdb752af36062aab55b870726f3a33de84ea895"
+  },
+  {
+    "source": "D:/Desktop/研一/智能柜/小程序教师端/原型框图/小程序/js/小程序管理员端页面线框图.data.js",
+    "copy": "reference/teacher.data.js",
+    "sha256": "1da366ab050568c5041edc07739aedbac65295c52fce52c3abcba4e53b858bd5"
+  },
+  {
+    "source": "D:/Desktop/研一/智能柜/小程序教师端/原型框图/小程序/js/小程序管理员端页面线框图.render.js",
+    "copy": "reference/teacher.render.js",
+    "sha256": "810cad18b31de252a9af038c87fe7152c014ef2a61abb712d84ddd8c704cc397"
+  },
+  {
+    "source": "D:/Desktop/研一/智能柜/小程序教师端/原型框图/小程序/js/小程序管理员端页面线框图.app.js",
+    "copy": "reference/teacher.app.js",
+    "sha256": "5fa299f63b13118fa752b10a14ce0dbec7b030416328a34fd6f123926fbaff8b"
+  },
+  {
+    "source": "D:/Desktop/研一/智能柜/小程序教师端/原型框图/admin-demo.html",
+    "copy": "reference/power-admin.html",
+    "sha256": "f4ebb1a9f460e7303572f0892ed29c1fa665326e150b318b8c6040de20622b1a"
+  },
+  {
+    "source": "D:/Desktop/研一/智能柜/小程序教师端/原型框图/manager-demo-v2.html",
+    "copy": "reference/power-approver.html",
+    "sha256": "f320400a39868e19d16c6e82e6ca83b727050b7ad421177805b103156a607976"
+  }
+]

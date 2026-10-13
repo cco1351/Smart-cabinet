@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>智慧插座 - 竞赛管理者端演示</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#edf1f4;color:#17202a;font-size:14px;max-width:420px;margin:0 auto;min-height:100vh;padding-bottom:65px}
+.role-banner{display:flex;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(135deg,#17202a,#25313b);color:#fff;font-size:13px;position:sticky;top:0;z-index:100}
+.role-badge{background:#b7791f;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700}
+.page{display:none}
+.page.active{display:block}
+
+.header{display:flex;justify-content:space-between;align-items:center;padding:16px;background:#fff;border-bottom:1px solid #d7e0e6}
+.header-title{font-size:18px;font-weight:800;color:#17202a}
+.content{padding:12px}
+
+/* Manager device list */
+.stat-row{display:flex;background:#fff;padding:8px 12px 12px;gap:6px}
+.stat-item{flex:1;text-align:center;padding:8px 0;border-radius:6px;background:#f0f4f6}
+.stat-item.free{background:#edf8f3}.stat-item.on{background:#eef4fb}
+.stat-item.fault{background:#fef2f2}
+.stat-num{display:block;font-size:20px;font-weight:800;color:#17202a;line-height:1.1}
+.stat-item.free .stat-num{color:#16826c}.stat-item.on .stat-num{color:#276fbf}.stat-item.fault .stat-num{color:#dc2626}
+.stat-label{display:block;font-size:10px;color:#697783;margin-top:2px}
+
+.batch-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid #f0f4f6}
+.batch-left{display:flex;align-items:center;gap:10px}
+.batch-select{font-size:13px;color:#16826c;font-weight:600;cursor:pointer}
+.batch-count{font-size:12px;color:#697783}
+.batch-right{display:flex;gap:8px}
+.batch-btn{padding:5px 12px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;border:none}
+.batch-btn.on{background:#16826c;color:#fff}.batch-btn.off{background:#bc3f3f;color:#fff}
+
+.device-item{display:flex;align-items:center;background:#fff;border-radius:6px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(23,32,42,0.04);border-left:4px solid #e5ecef}
+.device-item.checked{background:#f0faf6;border-left-color:#16826c}
+.device-item.status-fault{opacity:.45}
+.dev-item-check{padding-right:12px;cursor:pointer}
+.check-box{width:22px;height:22px;border:2px solid #d7e0e6;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.check-box.checked{background:#16826c;border-color:#16826c}
+.dev-left{flex:1;min-width:0}
+.dev-name{font-size:15px;font-weight:700;color:#17202a}
+.dev-info{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
+.dev-status-tag{font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600}
+.dev-status-tag.free{background:#edf8f3;color:#16826c}
+.dev-status-tag.on{background:#edf8f3;color:#16826c}
+.dev-status-tag.fault{background:#fef2f2;color:#dc2626}
+.dev-sub{font-size:11px;color:#64748b}
+.dev-params{font-size:11px;color:#94a3b8;margin-top:4px}
+.dev-action{padding:6px 16px;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer;border:none;margin-left:10px}
+.dev-action.on{background:#16826c;color:#fff}
+.dev-action.off{background:#bc3f3f;color:#fff}
+
+/* Room tabs */
+.room-tabs{display:flex;gap:8px;padding:10px 16px;background:#fff;overflow-x:auto}
+.room-tab{padding:6px 14px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;background:#f0f4f6;color:#697783;border:2px solid transparent;white-space:nowrap}
+.room-tab.active{background:#edf8f3;color:#16826c;border-color:#16826c}
+.room-tab.locked{opacity:.5;cursor:not-allowed}
+
+/* Approval cards */
+.tabs-bar{display:flex;background:#fff;border-bottom:1px solid #e5ecef}
+.tab-item{flex:1;text-align:center;padding:16px 0;font-size:14px;color:#697783;font-weight:600;position:relative;cursor:pointer}
+.tab-item.active{color:#16826c}
+.tab-item.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:30px;height:3px;background:#16826c;border-radius:2px}
+.tab-badge{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:8px;background:#dc2626;color:#fff;font-size:11px;font-weight:700;line-height:1.4}
+
+.approval-card{background:#fff;border-radius:8px;padding:16px;margin-bottom:10px;box-shadow:0 1px 6px rgba(23,32,42,0.06)}
+.ac-header{display:flex;justify-content:space-between;margin-bottom:12px}
+.ac-user{display:flex;align-items:center;gap:10px}
+.ac-avatar{width:36px;height:36px;border-radius:10px;background:#2563eb;color:#fff;font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.ac-name{font-size:15px;font-weight:700;color:#17202a}
+.ac-id{font-size:11px;color:#94a3b8}
+.ac-body{margin-bottom:12px}
+.ac-row{font-size:13px;color:#51606b;margin-bottom:4px}
+.ac-row.reject-reason{color:#dc2626;font-weight:600}
+.ac-row.auditor{color:#64748b;font-size:11px;margin-top:2px}
+.ac-status-tag{font-size:12px;padding:3px 10px;border-radius:4px;font-weight:700}
+.ac-status-tag.ok{background:#edf8f3;color:#16826c}
+.ac-status-tag.fail{background:#fef2f2;color:#dc2626}
+.ac-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:12px;border-top:1px solid #f0f4f6}
+.ac-btn{padding:7px 24px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;border:none}
+.ac-btn.reject{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.ac-btn.approve{background:#16826c;color:#fff}
+
+/* Admin center */
+.card{background:#fff;border-radius:8px;padding:16px;margin-bottom:10px;box-shadow:0 1px 6px rgba(23,32,42,0.06)}
+.card-row{display:flex;justify-content:space-between;align-items:flex-start}
+.card-name{font-size:16px;font-weight:700;color:#17202a;display:block}
+.card-meta{font-size:12px;color:#697783;display:block;margin-top:3px}
+.card-room{font-size:12px;color:#16826c;font-weight:600;display:block;margin-top:3px}
+.course-name{font-size:16px;font-weight:700;color:#17202a;display:block}
+.course-teacher{font-size:12px;color:#51606b;display:block;margin-top:2px}
+.course-info{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.info-tag{font-size:10px;padding:2px 8px;border-radius:3px;background:#edf8f3;color:#16826c;font-weight:600}
+.info-tag.room{background:#eef4fb;color:#276fbf}
+.info-tag.weeks{background:#f0f4f6;color:#51606b}
+.add-btn{padding:8px 0;text-align:center;background:#d1d5db;color:#9ca3af;border-radius:8px;font-size:14px;font-weight:700;margin-top:8px;cursor:default}
+
+/* My page */
+.user-header{display:flex;align-items:center;padding:32px 20px 28px;background:linear-gradient(135deg,#17202a,#25313b);gap:16px}
+.user-avatar{width:64px;height:64px;border-radius:18px;background:rgba(22,130,108,.3);border:2px solid rgba(22,130,108,.5);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff}
+.user-name{font-size:20px;font-weight:800;color:#fff}
+.user-role{display:inline-block;padding:2px 10px;background:rgba(22,130,108,.4);border-radius:4px;font-size:11px;color:#7ee8c7;margin-top:4px}
+.menu-list{background:#fff;border-radius:8px;margin:16px;overflow:hidden;box-shadow:0 1px 6px rgba(23,32,42,0.06)}
+.menu-item{display:flex;align-items:center;padding:18px 20px;border-bottom:1px solid #f0f4f6;cursor:pointer}
+.menu-item:last-child{border-bottom:none}
+.menu-item:active{background:#f8fafb}
+.menu-icon-wrap{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-right:14px;font-size:20px}
+.menu-label{flex:1;font-size:15px;font-weight:700;color:#17202a}
+.menu-arrow{font-size:18px;color:#b8c4cc}
+.logout-btn{margin:12px 16px 32px;padding:14px 0;text-align:center;background:#fff;color:#bc3f3f;font-size:15px;font-weight:700;border-radius:8px;border:1px solid #e0a6a6}
+
+/* Log & Alarm */
+.log-card{background:#fff;border-radius:8px;padding:14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(23,32,42,0.04)}
+.log-row-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.log-action{font-size:14px;font-weight:700}
+.log-result{font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600}
+.log-result.ok{color:#16a34a;background:#edf8f3}
+.log-result.fail{color:#dc2626;background:#fef2f2}
+.log-row-sub{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:12px;color:#64748b}
+.log-time{font-size:11px;color:#94a3b8}
+.alarm-card{background:#fff;border-radius:8px;padding:14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(23,32,42,0.04)}
+.alarm-row-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.alarm-left{display:flex;align-items:center;gap:8px}
+.alarm-dot{width:8px;height:8px;border-radius:50%}
+.alarm-dot.lv1{background:#dc2626}.alarm-dot.lv2{background:#d97706}.alarm-dot.lv3{background:#94a3b8}
+.alarm-station{font-size:14px;font-weight:700;color:#17202a}
+.alarm-time{font-size:11px;color:#94a3b8}
+.alarm-msg{font-size:12px;color:#475569;line-height:1.5;margin-bottom:8px}
+.alarm-tags{display:flex;gap:6px}
+.alarm-tag{font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600}
+.alarm-tag.lv1{background:#fef2f2;color:#dc2626}.alarm-tag.lv2{background:#fff8eb;color:#b7791f}.alarm-tag.lv3{background:#f0f4f6;color:#697783}
+.alarm-tag.status-tag{background:#edf8f3;color:#16826c}
+.alarm-data-row{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;background:#f8fafc;border-radius:6px;font-size:11px;color:#64748b}
+.alarm-data-row strong{color:#1e293b}
+
+/* Empty */
+.empty{text-align:center;padding:50px 0;color:#b8c4cc;font-size:14px}
+
+/* Range + Export */
+.range-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#fff;border-bottom:1px solid #f0f4f6;flex-wrap:wrap}
+.range-select{font-size:12px;color:#16826c;font-weight:600;padding:5px 12px;background:#edf8f3;border-radius:5px;border:1px solid transparent;cursor:pointer;-webkit-appearance:none}
+.range-count{font-size:11px;color:#94a3b8;margin-left:auto}
+.export-btn{font-size:13px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;background:#edf8f3;color:#16826c}
+.filter-row{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;background:#fff;border-bottom:1px solid #f0f4f6}
+.filter-chip{padding:5px 10px;font-size:11px;color:#697783;background:#f0f4f6;border-radius:4px;cursor:pointer}.filter-chip.active{background:#16826c;color:#fff}
+
+/* Sub pages */
+.sub-page{display:none}
+.sub-page.active{display:block}
+
+/* Back button */
+.sub-header{display:flex;align-items:center;gap:12px;padding:16px;background:#fff;border-bottom:1px solid #d7e0e6}
+.sub-back{font-size:18px;color:#16826c;font-weight:700;cursor:pointer}
+
+/* Toast & Modal */
+.toast{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.75);color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:999;display:none;white-space:nowrap}
+.toast.show{display:block;animation:toastIn .2s ease}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,-50%) scale(.9)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:998;display:none;align-items:center;justify-content:center;max-width:420px;margin:0 auto}
+.modal-overlay.show{display:flex}
+.modal-box{width:300px;background:#fff;border-radius:12px;padding:24px 20px 18px;text-align:center}
+.modal-title{font-size:17px;font-weight:800;color:#17202a;margin-bottom:8px}
+.modal-msg{font-size:14px;color:#51606b;line-height:1.6;margin-bottom:18px;white-space:pre-line}
+.modal-btns{display:flex;gap:10px}
+.modal-btn{flex:1;height:40px;line-height:40px;text-align:center;font-size:14px;font-weight:700;border-radius:8px;border:none;cursor:pointer}
+.modal-btn.cancel{background:#f0f4f6;color:#697783}
+.modal-btn.confirm{background:#16826c;color:#fff}
+.modal-btn.danger{background:#dc2626;color:#fff}
+
+/* Reject input */
+.reject-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:999;display:none;align-items:center;justify-content:center;max-width:420px;margin:0 auto}
+.reject-modal.show{display:flex}
+.reject-box{width:320px;background:#fff;border-radius:12px;padding:24px 20px 18px}
+.reject-title{font-size:17px;font-weight:800;color:#17202a;margin-bottom:12px}
+.reject-info{font-size:13px;color:#64748b;line-height:1.6;margin-bottom:14px}
+.reject-input{width:100%;min-height:80px;border:1px solid #e5ecef;border-radius:6px;padding:10px 12px;font-size:14px;color:#17202a;resize:vertical;font-family:inherit}
+.reject-btns{display:flex;gap:10px;margin-top:16px}
+
+/* Tab bar */
+.tab-bar{display:flex;position:fixed;bottom:0;left:0;right:0;max-width:420px;margin:0 auto;height:55px;background:#fff;border-top:1px solid #e5ecef;z-index:99}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;position:relative}
+.tab-item.active .tab-text{color:#16826c;font-weight:700}
+.tab-icon-wrap{position:relative}
+.tab-icon{font-size:20px}
+.tab-badge{position:absolute;top:-10px;right:-14px;min-width:16px;height:16px;line-height:16px;text-align:center;background:#dc2626;color:#fff;font-size:10px;font-weight:700;border-radius:8px;padding:0 4px}
+.tab-text{font-size:11px;color:#697783}
+
+/* 小程序接入与视觉统一 */
+:root{--app-bg:#f8faf9;--app-ink:#162127;--app-muted:#687782;--app-line:#d7e1df;--app-accent:#1f8a70;--app-accent-dark:#285e59;--phone-edge:#17232b}
+body{max-width:none;min-height:100vh;margin:0;padding:22px;display:grid;justify-items:center;align-items:start;background:linear-gradient(135deg,rgba(31,138,112,.08),transparent 34%),linear-gradient(90deg,rgba(22,33,39,.045) 1px,transparent 1px),linear-gradient(180deg,rgba(22,33,39,.04) 1px,transparent 1px),#e8edf1;background-size:28px 28px;color:var(--app-ink)}
+.power-phone{width:375px;height:760px;position:relative;overflow:hidden;background:var(--app-bg);border:10px solid var(--phone-edge);border-radius:34px;box-shadow:0 28px 58px rgba(22,33,39,.25)}
+.module-status{height:30px;padding:8px 18px 0;display:flex;align-items:center;justify-content:space-between;background:#fff;color:#4b5563;font-size:12px}
+.module-header{height:52px;display:grid;grid-template-columns:62px 1fr 76px;align-items:center;padding:0 12px;background:#fff;border-bottom:1px solid #dfe7e5;position:relative;z-index:110;box-shadow:0 6px 16px rgba(22,33,39,.04)}
+.module-title{text-align:center;font-size:17px;font-weight:800;color:#172f29}
+.module-level{text-align:center;padding:3px 7px;border-radius:999px;background:#e8f4f0;color:#2f7365;font-size:10px;font-weight:800;white-space:nowrap}
+.module-switch{height:28px;padding:0 8px;border:1px solid #a9d2c7;border-radius:7px;background:#edf7f3;color:#286b5d;font-size:10px;font-weight:800;white-space:nowrap;cursor:pointer}
+.role-banner{position:relative;top:auto;padding:10px 14px;background:linear-gradient(135deg,#e8f4f0,#f8fbfa);color:#31574e;border-bottom:1px solid #cfe1dc;z-index:90}
+.role-badge{background:#d8eee7;color:#256657}
+.role-banner>span:last-child{color:#71847f!important}
+.header,.tabs-bar,.batch-bar,.room-tabs,.tab-bar,.range-bar,.filter-row{border-color:var(--app-line)}
+.header-title{color:var(--app-ink)}
+.content{background:var(--app-bg)}
+.device-item,.approval-card,.card,.log-card,.alarm-card,.menu-list{border:1px solid #e0e8e5;box-shadow:0 3px 10px rgba(34,64,57,.04)}
+.stat-item{background:#f2f6f4}.stat-item.free,.dev-status-tag.free,.dev-status-tag.on{background:#e9f4f0}
+.room-tab.active{background:#e9f4f0;color:var(--app-accent);border-color:var(--app-accent)}
+.batch-select,.tab-item.active,.sub-back,.export-btn{color:var(--app-accent)}
+.tab-item.active::after{background:var(--app-accent)}
+.dev-action.on,.batch-btn.on,.modal-btn.confirm,.ac-btn.approve{background:var(--app-accent)}
+.user-header{background:linear-gradient(135deg,var(--app-accent-dark),#397c6e)}
+.user-role{background:rgba(255,255,255,.13);color:#d9f1ea}
+.tabs-bar .tab-item{display:block;padding:14px 0;gap:0}
+.tabs-bar .tab-badge{position:static;display:inline-block;margin-left:6px;min-width:auto;height:auto;line-height:1.4;padding:1px 8px;vertical-align:1px}
+.tab-bar .tab-item{display:flex;padding:0}
+.tab-bar .tab-badge{position:absolute}
+.power-phone>.page{height:calc(100% - 126px);overflow-y:auto;overscroll-behavior:contain;padding-bottom:70px}
+.power-phone>.page::-webkit-scrollbar{width:0;height:0}
+.power-phone .tab-bar{position:absolute;max-width:none;height:64px;padding-bottom:0}
+.power-phone .modal-overlay,.power-phone .reject-modal{position:absolute;max-width:none}
+.power-phone .toast{position:absolute}
+@media(max-width:430px){body{padding:8px}.power-phone{width:calc(100vw - 16px);height:calc(100vh - 16px);border-width:8px;border-radius:28px}}
+</style>
+</head>
+<body>
+
+<div class="power-phone">
+<div class="module-status"><span>9:41</span><span>5G&nbsp;&nbsp;100%</span></div>
+<div class="module-header">
+  <div class="module-level">二级管理员</div>
+  <div class="module-title">电源安全管理</div>
+  <button class="module-switch" type="button" aria-label="返回智能柜端" onclick="returnToMiniApp()">智能柜端</button>
+</div>
+
+<div class="role-banner">
+  <span>🔑</span><span>竞赛管理者 · 刘队长</span><span class="role-badge">管理：302 实验室</span>
+  <span style="margin-left:auto;font-size:11px;color:#94a3b8">仅对本实验室有操作权限</span>
+</div>
+
+<!-- ==================== PAGE 0: 工位（设备查看）==================== -->
+<div class="page active" id="page-stations">
+  <!-- 全部房间Tab切换 -->
+  <div class="room-tabs" id="roomTabs"></div>
+  <div id="roomStats" class="stat-row"></div>
+  <div class="batch-bar" id="batchBar" style="display:none">
+    <div class="batch-left"><span class="batch-select" id="selectAllBtn" onclick="mgrSelectAll()">全选</span><span class="batch-count" id="selectCount"></span></div>
+    <div class="batch-right"><button class="batch-btn on" id="batchOn" style="display:none" onclick="mgrBatchOn()">通电(N)</button><button class="batch-btn off" id="batchOff" style="display:none" onclick="mgrBatchOff()">断电(N)</button></div>
+  </div>
+  <div class="content" id="roomDeviceList"></div>
+</div>
+
+<!-- ==================== PAGE 1: 审批 ==================== -->
+<div class="page" id="page-approval">
+  <div class="header"><div class="header-title">预约审批</div></div>
+  <div class="tabs-bar">
+    <div class="tab-item active" onclick="approvalTab('pending')">待审批<span class="tab-badge" id="approvalBadge" style="display:none">0</span></div>
+    <div class="tab-item" onclick="approvalTab('done')">已审批</div>
+  </div>
+  <div class="content" id="approvalContent"></div>
+</div>
+
+<!-- ==================== PAGE 2: 管理（管理中心）==================== -->
+<div class="page" id="page-manage">
+  <div class="header"><div class="header-title">管理中心</div></div>
+  <div class="tabs-bar">
+    <div class="tab-item active" onclick="manageTab('managers')">管理者</div>
+    <div class="tab-item" onclick="manageTab('courses')">课表管理</div>
+  </div>
+  <div class="content" id="manageContent"></div>
+</div>
+
+<!-- ==================== PAGE 3: 我的 ==================== -->
+<div class="page" id="page-my">
+  <div id="my-home" class="sub-page active">
+    <div class="user-header">
+      <div class="user-avatar">刘</div>
+      <div><div class="user-name">刘队长</div><div class="user-role">竞赛管理者</div></div>
+    </div>
+    <div class="menu-list">
+      <div class="menu-item" onclick="openSub('alarms')"><div class="menu-icon-wrap" style="background:#fff1f1">📋</div><span class="menu-label">告警记录</span><span class="menu-arrow">→</span></div>
+      <div class="menu-item" onclick="openSub('logs')"><div class="menu-icon-wrap" style="background:#f0f4f6">📄</div><span class="menu-label">操作日志</span><span class="menu-arrow">→</span></div>
+      <div class="menu-item" onclick="openSub('profile')"><div class="menu-icon-wrap" style="background:#edf8f3">👤</div><span class="menu-label">个人资料</span><span class="menu-arrow">→</span></div>
+    </div>
+    <div class="logout-btn">退出登录</div>
+  </div>
+  <!-- Alarms -->
+  <div id="sub-alarms" class="sub-page">
+    <div class="sub-header" onclick="closeSub()"><span class="sub-back">←</span><span class="header-title">告警记录</span></div>
+    <div class="content" id="alarmList"></div>
+<!-- Alarms range & export injected by renderAlarms -->
+<div id="alarmExtra" style="display:none"></div>
+  </div>
+  <!-- Logs -->
+  <div id="sub-logs" class="sub-page">
+    <div class="sub-header" onclick="closeSub()"><span class="sub-back">←</span><span class="header-title">操作日志</span></div>
+    <div class="content" id="logList"></div>
+  </div>
+  <!-- Profile -->
+  <div id="sub-profile" class="sub-page">
+    <div class="sub-header" onclick="closeSub()"><span class="sub-back">←</span><span class="header-title">个人资料</span></div>
+    <div class="content">
+      <div class="card"><div class="user-header" style="background:transparent;padding:0"><div class="user-avatar">刘</div><div><div class="user-name" style="color:#17202a;font-size:18px">刘队长</div><div class="user-role" style="background:#fff8eb;color:#b7791f">竞赛管理者</div></div></div></div>
+      <div class="card"><div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f4f6"><span style="color:#697783;font-size:13px">学号</span><span style="font-weight:600">20230201</span></div><div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f4f6"><span style="color:#697783;font-size:13px">手机</span><span style="font-weight:600">138****7777</span></div><div style="display:flex;justify-content:space-between;padding:10px 0"><span style="color:#697783;font-size:13px">管理实验室</span><span style="font-weight:600;color:#16826c">302 实验室</span></div></div>
+      <div class="logout-btn">退出登录</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box"><div class="modal-title" id="modalTitle"></div><div class="modal-msg" id="modalMsg"></div>
+    <div class="modal-btns"><button class="modal-btn cancel" onclick="closeModal(false)">取消</button><button class="modal-btn danger" id="modalConfirmBtn" onclick="closeModal(true)">确认</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="reject-modal" id="rejectModal">
+  <div class="reject-box"><div class="reject-title">驳回原因</div><div class="reject-info" id="rejectInfo"></div><textarea class="reject-input" id="rejectInput" placeholder="请输入驳回原因（必填）" maxlength="200"></textarea>
+    <div class="reject-btns"><button class="modal-btn cancel" onclick="closeReject()">取消</button><button class="modal-btn danger" onclick="confirmReject()">确认驳回</button></div>
+  </div>
+</div>
+
+<!-- Tab bar -->
+<div class="tab-bar">
+  <div class="tab-item active" onclick="switchTab(0)" id="tab0"><span class="tab-icon">🔌</span><span class="tab-text">工位</span></div>
+  <div class="tab-item" onclick="switchTab(1)" id="tab1"><div class="tab-icon-wrap"><span class="tab-icon">📋</span><div class="tab-badge" id="tabBadge" style="display:none">0</div></div><span class="tab-text">审批</span></div>
+  <div class="tab-item" onclick="switchTab(2)" id="tab2"><span class="tab-icon">⚙️</span><span class="tab-text">管理</span></div>
+  <div class="tab-item" onclick="switchTab(3)" id="tab3"><span class="tab-icon">👤</span><span class="tab-text">我的</span></div>
+</div>
+</div>
+
+<script>
+var pad=function(n){return String(n).padStart(2,'0')};var t2m=function(t){var p=t.split(':');return parseInt(p[0])*60+parseInt(p[1])}
+
+// ---- DATA ----
+var ALL_ROOMS=['301 实验室','302 实验室','303 实验室','401 实验室','402 实验室','501 机房']
+var MANAGER_ROOMS=['302 实验室'];var MANAGER_NAME='刘队长';var MANAGER_ID='20230201'
+var ROOMS=[{name:'301 实验室',prefix:'A',count:24},{name:'302 实验室',prefix:'B',count:24},{name:'303 实验室',prefix:'C',count:20},{name:'401 实验室',prefix:'D',count:20},{name:'402 实验室',prefix:'E',count:20},{name:'501 机房',prefix:'F',count:24}]
+var STATIONS=[];(function(){var id=1;ROOMS.forEach(function(r){for(var i=1;i<=r.count;i++){var sts=['on','off','off','on','off','off','on','off','off','on','off','offline'];var s=sts[(id-1)%sts.length];var volt=s==='on'?219+Math.floor(Math.random()*12):0;var cur=s==='on'?+(Math.random()*7+1).toFixed(1):0;STATIONS.push({id:'s'+String(id).padStart(3,'0'),name:'工位 '+r.prefix+'-'+String(i).padStart(2,'0'),location:r.name,status:s,voltage:volt,current:cur,power:Math.round(volt*cur)});id++}})})()
+var td=(new Date().getDay()||7)
+var COURSES=[{id:'c001',name:'嵌入式系统实验',teacher:'张老师',rooms:['301 实验室'],dayOfWeek:1,startTime:'08:30',endTime:'12:00',semesterStart:'2026-09-01',weekStart:1,weekEnd:16},{id:'c002',name:'数字电路实验',teacher:'李老师',rooms:['302 实验室'],dayOfWeek:3,startTime:'14:00',endTime:'17:00',semesterStart:'2026-09-01',weekStart:1,weekEnd:16},{id:'c003',name:'单片机原理',teacher:'王老师',rooms:['301 实验室'],dayOfWeek:1,startTime:'09:00',endTime:'12:00',semesterStart:'2026-09-01',weekStart:1,weekEnd:16},{id:'c004',name:'PCB设计实训',teacher:'赵老师',rooms:['301 实验室','302 实验室'],dayOfWeek:2,startTime:'14:00',endTime:'17:30',semesterStart:'2026-09-01',weekStart:1,weekEnd:16}]
+var MANAGERS=[{studentId:'t001',name:'张老师',rooms:'301 实验室、302 实验室'},{studentId:'20230201',name:'刘队长',rooms:'302 实验室'}]
+
+function genRes(){
+  var now=new Date();var today=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());var nM=now.getHours()*60+now.getMinutes()
+  var rM=nM+120,rS=pad(Math.floor(rM/60)%24)+':'+pad(rM%60),rE=pad(Math.floor((rM+90)/60)%24)+':'+pad((rM+90)%60)
+  return[
+    {id:'r001',studentName:'李同学',studentId:'20230101',stationName:'工位 B-05',location:'301 实验室',purpose:'电路调试',date:today,timeSlot:rS+'-'+rE,status:'pending_review',statusText:'审核中'},
+    {id:'r007',studentName:'王同学',studentId:'20230102',stationName:'工位 A-01',location:'301 实验室',purpose:'Python课程设计',date:today,timeSlot:rS+'-'+rE,status:'pending_review',statusText:'审核中'},
+    {id:'r008',studentName:'赵同学',studentId:'20230103',stationName:'工位 C-04',location:'302 实验室',purpose:'单片机课程实验',date:today,timeSlot:rS+'-'+rE,status:'pending_review',statusText:'审核中'},
+    {id:'r004',studentName:'李同学',studentId:'20230101',stationName:'工位 C-02',location:'302 实验室',purpose:'FPGA验证实验',date:today,timeSlot:'10:00-12:00',status:'rejected',statusText:'已驳回',rejectReason:'该时段已被课表占用',auditorName:'王管理员',auditTime:today+' 08:00'},
+    {id:'r006',studentName:'李同学',studentId:'20230101',stationName:'工位 D-01',location:'302 实验室',purpose:'数字电路实验',date:today,timeSlot:'14:00-16:00',status:'approved',statusText:'已通过',auditorName:'王管理员',auditTime:today+' 08:15'}
+  ]
+}
+var RS=genRes() //审批持久存储
+
+var alarms=(function(){
+  var now=new Date();var today=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());var h=now.getHours(),m=now.getMinutes()
+  function t(off){var mins=h*60+m-off,hh=Math.floor(mins/60)%24,mm=mins%60;return today+' '+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')}
+  return[
+    {id:'a001',stationName:'工位 B-01',level:2,message:'工位 B-01 电流偏高 — 当前电流 13.5A（告警阈值 12.8A）',status:'unread',time:t(20),actualValue:'13.5A',threshold:'12.8A'},
+    {id:'a002',stationName:'工位 D-05',level:3,message:'工位 D-05 设备离线，无心跳数据上报',status:'unread',time:t(90),actualValue:'—',threshold:'—'},
+    {id:'a003',stationName:'工位 C-04',level:2,message:'工位 C-04 电压偏低 — 当前电压 198V',status:'read',time:t(45),actualValue:'198V',threshold:'210V'}
+  ]
+})()
+
+var logs=(function(){
+  var now=new Date();var td=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());var h=now.getHours(),m=now.getMinutes()
+  function t(off){var mins=h*60+m-off,hh=Math.floor(mins/60)%24,mm=mins%60;return td+' '+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')}
+  return[
+    {id:'l001',time:t(0),stationName:'工位 B-02',action:'远程通电',actionType:'remote_on',source:'管理者',operator:'刘队长',result:'成功'},
+    {id:'l002',time:t(15),stationName:'工位 B-03',action:'远程断电',actionType:'remote_off',source:'管理者',operator:'刘队长',result:'成功'},
+    {id:'l003',time:t(30),stationName:'工位 B-01',action:'定时通电',actionType:'schedule_on',source:'自动计划',operator:'系统',result:'成功'}
+  ]
+})()
+
+var curTab=0,curRoom=ALL_ROOMS[0],mgrSel=[],mgrAllChk=false,modalCb=null,rejectTarget=null
+var apprTab='pending'
+
+// ---- HELPERS ----
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},1500)}
+function showModal(ttl,msg,btn,cls,cb){document.getElementById('modalTitle').textContent=ttl;document.getElementById('modalMsg').textContent=msg;var b=document.getElementById('modalConfirmBtn');b.textContent=btn||'确认';b.className='modal-btn '+(cls||'danger');document.getElementById('modal').classList.add('show');modalCb=function(ok){document.getElementById('modal').classList.remove('show');modalCb=null;if(cb)cb(ok)}}
+function closeModal(ok){if(modalCb)modalCb(ok)}
+function returnToMiniApp(){var sourceRole=new URLSearchParams(window.location.search).get('role');if(sourceRole!=='approver')sourceRole='admin';window.location.href='./小程序/小程序管理员端页面线框图.html?role='+sourceRole+'&page=role-admin-home'}
+function openSub(id){document.querySelectorAll('#page-my .sub-page').forEach(function(e){e.classList.remove('active')});document.getElementById('sub-'+id).classList.add('active');if(id==='alarms')renderAlarms();if(id==='logs')renderLogs()}
+function closeSub(){document.querySelectorAll('#page-my .sub-page').forEach(function(e){e.classList.remove('active')});document.getElementById('my-home').classList.add('active')}
+
+// ---- TAB SWITCH ----
+function switchTab(idx){
+  curTab=idx
+  document.getElementById('page-stations').classList.toggle('active',idx===0)
+  document.getElementById('page-approval').classList.toggle('active',idx===1)
+  document.getElementById('page-manage').classList.toggle('active',idx===2)
+  document.getElementById('page-my').classList.toggle('active',idx===3)
+  for(var i=0;i<4;i++)document.getElementById('tab'+i).classList.toggle('active',i===idx)
+  if(idx===0){curRoom=ALL_ROOMS[0];renderRoomTabs();selectRoom(curRoom)}
+  if(idx===1)approvalTab('pending')
+  if(idx===2)manageTab('managers')
+}
+
+// ---- STATIONS PAGE ----
+function renderRoomTabs(){
+  var h='';ALL_ROOMS.forEach(function(r){
+    var isMine=MANAGER_ROOMS.indexOf(r)>=0
+    h+='<div class="room-tab'+(r===curRoom?' active':'')+(isMine?'':' locked')+'" onclick="selectRoom(\''+r+'\')">'+(isMine?'🔑 ':'🔒 ')+r+'</div>'
+  });document.getElementById('roomTabs').innerHTML=h
+}
+function selectRoom(r){curRoom=r;mgrSel=[];mgrAllChk=false;renderRoomTabs();renderRoomDevices(r)}
+function renderRoomDevices(r){
+  var isMine=MANAGER_ROOMS.indexOf(r)>=0
+  // mgrSel / mgrAllChk 不清空 — 由 selectRoom 管理
+  var sts=STATIONS.filter(function(s){return s.location===r})
+  var sc={t:0,f:0,o:0,x:0};sts.forEach(function(s){sc.t++;if(s.status==='on')sc.o++;else if(s.status==='off')sc.f++;else sc.x++})
+  document.getElementById('roomStats').innerHTML='<div class="stat-item"><div class="stat-num">'+sc.t+'</div><div class="stat-label">总数</div></div><div class="stat-item free"><div class="stat-num">'+sc.f+'</div><div class="stat-label">空闲</div></div><div class="stat-item on"><div class="stat-num">'+sc.o+'</div><div class="stat-label">通电</div></div><div class="stat-item fault"><div class="stat-num">'+sc.x+'</div><div class="stat-label">故障</div></div>'
+  document.getElementById('batchBar').style.display=isMine?'flex':'none'
+  var h='';sts.forEach(function(s){
+    var canAct=isMine&&(s.status==='on'||s.status==='off');var sel=mgrSel.indexOf(s.id)>=0
+    h+='<div class="device-item status-'+(s.status==='fault'||s.status==='offline'?'fault':'')+(sel?' checked':'')+'">'
+    if(canAct)h+='<div class="dev-item-check" onclick="mgrToggle(\''+s.id+'\')"><div class="check-box'+(sel?' checked':'')+'">'+(sel?'✓':'')+'</div></div>'
+    h+='<div class="dev-left"><div class="dev-name">'+s.name+'</div><div class="dev-info"><span class="dev-status-tag '+(s.status==='on'?'on':'free')+'">'+(s.status==='on'?'通电':s.status==='fault'||s.status==='offline'?'故障':'空闲')+'</span></div>'
+    if(s.status==='on')h+='<div class="dev-params">'+s.voltage+'V · '+s.current+'A · '+s.power+'W</div>'
+    h+='</div>'
+    if(canAct)h+='<button class="dev-action '+(s.status==='on'?'off':'on')+'" onclick="mgrPower(\''+s.id+'\')">'+(s.status==='on'?'断电':'通电')+'</button>'
+    if(!canAct&&(s.status==='on'||s.status==='off'))h+='<button class="dev-action" style="background:#d1d5db;color:#9ca3af;cursor:default">无权限</button>'
+    h+='</div>'
+  })
+  document.getElementById('roomDeviceList').innerHTML=h||'<div class="empty">暂无设备</div>'
+  updateBatchBar()
+}
+function mgrToggle(id){var i=mgrSel.indexOf(id);if(i>=0)mgrSel.splice(i,1);else mgrSel.push(id);renderRoomDevices(curRoom)}
+function mgrSelectAll(){if(mgrAllChk){mgrSel=[]}else{STATIONS.filter(function(s){return s.location===curRoom&&(s.status==='on'||s.status==='off')}).forEach(function(s){mgrSel.push(s.id)})};mgrAllChk=!mgrAllChk;renderRoomDevices(curRoom)}
+function updateBatchBar(){
+  var c=mgrSel.length;document.getElementById('selectCount').textContent=c>0?'已选 '+c+' 个':''
+  document.getElementById('batchOn').style.display=c>0?'inline-block':'none';document.getElementById('batchOff').style.display=c>0?'inline-block':'none'
+  document.getElementById('batchOn').textContent='通电('+c+')';document.getElementById('batchOff').textContent='断电('+c+')'
+  document.getElementById('selectAllBtn').textContent=mgrAllChk?'取消全选':'全选'
+}
+function mgrPower(id){
+  var s=STATIONS.find(function(x){return x.id===id});if(!s)return
+  if(s.status==='off')showModal('确认通电','确定对【'+s.name+'】通电？','确认通电','confirm',function(ok){if(ok){s.status='on';s.voltage=219+Math.floor(Math.random()*12);s.current=+(Math.random()*7+1).toFixed(1);s.power=Math.round(s.voltage*s.current);logAction(s.name,'远程通电','remote_on');renderRoomDevices(curRoom);toast('已通电')}})
+  else showModal('确认断电','确定对【'+s.name+'】断电？','确认断电','danger',function(ok){if(ok){s.status='off';s.voltage=0;s.current=0;s.power=0;logAction(s.name,'远程断电','remote_off');renderRoomDevices(curRoom);toast('已断电')}})
+}
+function mgrBatchOn(){if(!mgrSel.length){toast('请先勾选设备');return}showModal('批量通电','确定对 '+mgrSel.length+' 个设备通电？','确认通电','confirm',function(ok){if(ok){mgrSel.forEach(function(id){var s=STATIONS.find(function(x){return x.id===id});if(s){s.status='on';s.voltage=219+Math.floor(Math.random()*12);s.current=+(Math.random()*7+1).toFixed(1);s.power=Math.round(s.voltage*s.current);logAction(s.name,'远程通电','remote_on')}});renderRoomDevices(curRoom);toast('已通电 '+mgrSel.length+' 个')}})}
+function mgrBatchOff(){if(!mgrSel.length){toast('请先勾选设备');return}showModal('批量断电','确定对 '+mgrSel.length+' 个设备断电？','确认断电','danger',function(ok){if(ok){mgrSel.forEach(function(id){var s=STATIONS.find(function(x){return x.id===id});if(s){s.status='off';s.voltage=0;s.current=0;s.power=0;logAction(s.name,'远程断电','remote_off')}});renderRoomDevices(curRoom);toast('已断电 '+mgrSel.length+' 个')}})}
+function logAction(name,action,type){var now=new Date();logs.unshift({id:'l'+Date.now(),time:now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds()),stationName:name,action:action,actionType:type,source:'管理者',operator:'刘队长',result:'成功'})}
+
+// ---- APPROVAL PAGE ----
+function approvalTab(tab){
+  apprTab=tab;document.querySelectorAll('#page-approval .tab-item').forEach(function(e,i){e.classList.toggle('active',i===(tab==='pending'?0:1))})
+  var managed=RS.filter(function(r){return MANAGER_ROOMS.indexOf(r.location)>=0})
+  var pending=managed.filter(function(r){return r.status==='pending_review'})
+  var done=managed.filter(function(r){return r.status!=='pending_review'})
+  var b=document.getElementById('approvalBadge');b.style.display=pending.length?'inline-block':'none';b.textContent=pending.length
+  document.getElementById('tabBadge').style.display=pending.length?'block':'none';document.getElementById('tabBadge').textContent=pending.length
+  var list=tab==='pending'?pending:done;var h=''
+  if(tab==='pending'){
+    list.forEach(function(r){h+='<div class="approval-card"><div class="ac-header"><div class="ac-user"><div class="ac-avatar">'+r.studentName[0]+'</div><div><div class="ac-name">'+r.studentName+'</div><div class="ac-id">'+r.studentId+'</div></div></div></div><div class="ac-body"><div class="ac-row">📍 '+r.stationName+'（'+r.location+'）</div><div class="ac-row">📅 '+r.date+' '+r.timeSlot+'</div><div class="ac-row">📝 '+r.purpose+'</div></div><div class="ac-actions"><button class="ac-btn reject" onclick="openReject(\''+r.id+'\')">驳回</button><button class="ac-btn approve" onclick="approveOne(\''+r.id+'\')">通过</button></div></div>'})
+  }else{
+    list.forEach(function(r){h+='<div class="approval-card"><div class="ac-header"><div class="ac-user"><div class="ac-avatar">'+r.studentName[0]+'</div><div><div class="ac-name">'+r.studentName+'</div><div class="ac-id">'+r.studentId+'</div></div></div><div class="ac-status-tag '+(r.status==='approved'?'ok':'fail')+'">'+r.statusText+'</div></div><div class="ac-body"><div class="ac-row">📍 '+r.stationName+'（'+r.location+'）</div><div class="ac-row">📅 '+r.date+' '+r.timeSlot+'</div><div class="ac-row">📝 '+r.purpose+'</div>'+(r.rejectReason?'<div class="ac-row reject-reason">❌ 驳回原因：'+r.rejectReason+'</div>':'')+(r.auditorName?'<div class="ac-row auditor">👤 审批人：'+r.auditorName+' · '+r.auditTime+'</div>':'')+'</div></div>'})
+  }
+  if(!list.length)h='<div class="empty">暂无记录</div>'
+  document.getElementById('approvalContent').innerHTML=h
+}
+function approveOne(id){var r=RS.find(function(x){return x.id===id});if(!r)return;showModal('确认通过','通过「'+r.studentName+'」的预约申请？\n工位：'+r.stationName+'\n时段：'+r.timeSlot,'确认通过','confirm',function(ok){if(ok){r.status='approved';r.statusText='已通过';r.auditorName='刘队长';r.auditTime=new Date().toISOString().replace('T',' ').slice(0,19);approvalTab(apprTab);toast('已通过')}})}
+function openReject(id){rejectTarget=RS.find(function(x){return x.id===id});if(!rejectTarget)return;document.getElementById('rejectInfo').textContent=rejectTarget.studentName+' · '+rejectTarget.stationName+'\n'+rejectTarget.date+' '+rejectTarget.timeSlot;document.getElementById('rejectInput').value='';document.getElementById('rejectModal').classList.add('show')}
+function closeReject(){document.getElementById('rejectModal').classList.remove('show');rejectTarget=null}
+function confirmReject(){var reason=document.getElementById('rejectInput').value.trim();if(!reason){toast('请输入驳回原因');return};rejectTarget.status='rejected';rejectTarget.statusText='已驳回';rejectTarget.rejectReason=reason;rejectTarget.auditorName='刘队长';rejectTarget.auditTime=new Date().toISOString().replace('T',' ').slice(0,19);closeReject();approvalTab(apprTab);toast('已驳回')}
+
+// ---- MANAGE PAGE ----
+function manageTab(tab){
+  document.querySelectorAll('#page-manage .tab-item').forEach(function(e,i){e.classList.toggle('active',i===(tab==='managers'?0:1))})
+  var h='';var dispName='刘队长'
+  if(tab==='managers'){
+    h+='<div class="card" style="margin-bottom:8px"><div class="card-row"><div class="card-left"><span class="card-name">刘队长</span><span class="card-meta">学号: 20230201 | 手机: 138****7777</span><span class="card-room">🔑 302 实验室</span></div></div></div>'
+    h+='<div class="card"><div class="card-row"><div class="card-left"><span class="card-name">张老师</span><span class="card-meta">学号: t001 | 手机: 138****6666</span><span class="card-room">🔑 301 实验室、302 实验室</span></div></div></div>'
+    h+='<div class="add-btn">+ 添加管理者（仅管理员可操作）</div>'
+    if(!MANAGERS.length)h+='<div class="empty">暂无管理者</div>'
+  }else{
+    COURSES.forEach(function(c){var roomsT=(c.rooms||[c.room]||[]).join('、');h+='<div class="card"><div class="card-row"><div class="card-left"><span class="course-name">'+c.name+'</span><span class="course-teacher">👨‍🏫 '+c.teacher+'</span><div class="course-info"><span class="info-tag">'+(['一','二','三','四','五','六','日'][(c.dayOfWeek||1)-1])+' '+(c.startTime||'')+'-'+(c.endTime||'')+'</span><span class="info-tag room">📍 '+roomsT+'</span><span class="info-tag weeks">📅 第'+(c.weekStart||1)+'-'+(c.weekEnd||16)+'周</span></div></div></div></div>'})
+    h+='<div class="add-btn">+ 添加课表（仅管理员可操作）</div>'
+  }
+  if(!h||h==='<div class="add-btn">+ 添加管理者（仅管理员可操作）</div>')h='<div class="empty">暂无数据</div>'
+  document.getElementById('manageContent').innerHTML=h
+}
+
+// ---- ALARMS & LOGS ----
+var alarmRng=0,logRng=0,logFltr='all'
+function FMT(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function getToday(){var n=new Date();return n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate())}
+function renderAlarms(){
+  var lv={1:'安全类',2:'异常类',3:'离线类'};var now=new Date();var td2=getToday();var ds='',de=''
+  if(alarmRng===0){var s=new Date(now.getTime()-7*864e5);ds=FMT(s);de=td2}else if(alarmRng===1){var s=new Date(now.getTime()-15*864e5);ds=FMT(s);de=td2}else if(alarmRng===2){var s=new Date(now.getTime()-30*864e5);ds=FMT(s);de=td2}
+  var list=alarms;if(ds&&de)list=list.filter(function(a){var ad=(a.time||'').split(' ')[0];return ad>=ds&&ad<=de})
+  var h='';h+='<div class="range-bar"><select class="range-select" onchange="alarmRng=parseInt(this.value);renderAlarms()"><option value="0"'+(alarmRng===0?' selected':'')+'>最近7天</option><option value="1"'+(alarmRng===1?' selected':'')+'>最近15天</option><option value="2"'+(alarmRng===2?' selected':'')+'>最近30天</option></select><span class="export-btn" style="margin-left:auto;cursor:pointer" onclick="exportAlarmCSV()">📤 导出</span><span class="range-count">'+list.length+' 条</span></div><div class="content">'
+  list.forEach(function(a){h+='<div class="alarm-card"><div class="alarm-row-top"><div class="alarm-left"><div class="alarm-dot lv'+a.level+'"></div><span class="alarm-station">302 实验室 · '+a.stationName+'</span></div><span class="alarm-time">'+a.time+'</span></div><div class="alarm-msg">'+a.message+'</div><div class="alarm-tags"><span class="alarm-tag lv'+a.level+'">'+lv[a.level]+'</span><span class="alarm-tag status-tag">'+(a.status==='read'?'已读':'未读')+'</span></div>'+(a.actualValue&&a.threshold?'<div class="alarm-data-row">实测：<strong>'+a.actualValue+'</strong> | 阈值：<strong>'+a.threshold+'</strong></div>':'')+'</div>'})
+  if(!list.length)h+='<div class="empty">暂无告警</div>'
+  h+='</div>';document.getElementById('alarmList').innerHTML=h
+}
+function renderLogs(){
+  var now=new Date();var td2=getToday();var ds2='',de2=''
+  if(logRng===0){var s=new Date(now.getTime()-7*864e5);ds2=FMT(s);de2=td2}else if(logRng===1){var s=new Date(now.getTime()-15*864e5);ds2=FMT(s);de2=td2}else if(logRng===2){var s=new Date(now.getTime()-30*864e5);ds2=FMT(s);de2=td2}
+  var list=logs;if(ds2&&de2)list=list.filter(function(l){var ld=(l.time||'').split(' ')[0];return ld>=ds2&&ld<=de2});if(logFltr!=='all')list=list.filter(function(l){return l.actionType===logFltr})
+  var colors={schedule_on:'#16a34a',remote_on:'#16a34a',schedule_off:'#64748b',remote_off:'#64748b'};var h=''
+  h+='<div class="range-bar"><select class="range-select" onchange="logRng=parseInt(this.value);renderLogs()"><option value="0"'+(logRng===0?' selected':'')+'>最近7天</option><option value="1"'+(logRng===1?' selected':'')+'>最近15天</option><option value="2"'+(logRng===2?' selected':'')+'>最近30天</option></select><span class="export-btn" style="margin-left:auto;cursor:pointer" onclick="exportLogCSV()">📤 导出</span><span class="range-count">'+list.length+' 条</span></div><div class="filter-row"><div class="filter-chip'+(logFltr==='all'?' active':'')+'" onclick="logFltr=\'all\';renderLogs()">全部</div><div class="filter-chip'+(logFltr==='remote_on'?' active':'')+'" onclick="logFltr=\'remote_on\';renderLogs()">远程通电</div><div class="filter-chip'+(logFltr==='remote_off'?' active':'')+'" onclick="logFltr=\'remote_off\';renderLogs()">远程断电</div><div class="filter-chip'+(logFltr==='schedule_on'?' active':'')+'" onclick="logFltr=\'schedule_on\';renderLogs()">定时通电</div><div class="filter-chip'+(logFltr==='schedule_off'?' active':'')+'" onclick="logFltr=\'schedule_off\';renderLogs()">定时断电</div></div><div class="content">'
+  list.forEach(function(l){h+='<div class="log-card"><div class="log-row-top"><span class="log-action" style="color:'+(colors[l.actionType]||'#334155')+'">'+l.action+'</span><span class="log-result '+(l.result==='成功'?'ok':'fail')+'">'+l.result+'</span></div><div class="log-row-sub"><span>302 实验室 · '+l.stationName+'</span><span class="log-time">'+l.time+'</span></div><div class="log-row-sub"><span>'+l.source+'</span><span>'+l.operator+'</span></div></div>'})
+  if(!list.length)h+='<div class="empty">暂无日志</div>'
+  h+='</div>';document.getElementById('logList').innerHTML=h
+}
+
+// CSV Export
+function exportAlarmCSV(){
+  var lv={1:'安全类',2:'异常类',3:'离线类'};var now=new Date();var td2=getToday();var ds='',de=''
+  if(alarmRng===0){var s=new Date(now.getTime()-7*864e5);ds=FMT(s);de=td2}else if(alarmRng===1){var s=new Date(now.getTime()-15*864e5);ds=FMT(s);de=td2}else if(alarmRng===2){var s=new Date(now.getTime()-30*864e5);ds=FMT(s);de=td2}
+  var list=alarms;if(ds&&de)list=list.filter(function(a){var ad=(a.time||'').split(' ')[0];return ad>=ds&&ad<=de})
+  var csv='时间,工位,告警类型,级别,实测值,阈值,状态,详情\n'
+  list.forEach(function(a){csv+=[a.time,a.stationName,lv[a.level]||'',a.level,a.actualValue||'',a.threshold||'',a.status==='read'?'已读':'未读','"'+a.message.replace(/"/g,'""')+'"'].join(',')+'\n'})
+  downloadCSV(csv,'告警记录_'+getToday()+'.csv')
+}
+function exportLogCSV(){
+  var now=new Date();var td2=getToday();var ds2='',de2=''
+  if(logRng===0){var s=new Date(now.getTime()-7*864e5);ds2=FMT(s);de2=td2}else if(logRng===1){var s=new Date(now.getTime()-15*864e5);ds2=FMT(s);de2=td2}else if(logRng===2){var s=new Date(now.getTime()-30*864e5);ds2=FMT(s);de2=td2}
+  var list=logs;if(ds2&&de2)list=list.filter(function(l){var ld=(l.time||'').split(' ')[0];return ld>=ds2&&ld<=de2});if(logFltr!=='all')list=list.filter(function(l){return l.actionType===logFltr})
+  var csv='时间,工位,操作,操作类型,来源,操作人,结果\n'
+  list.forEach(function(l){csv+=[l.time,l.stationName,l.action,l.actionType,l.source,l.operator,l.result].join(',')+'\n'})
+  downloadCSV(csv,'操作日志_'+getToday()+'.csv')
+}
+function downloadCSV(csv,fn){
+  var BOM='﻿',blob=new Blob([BOM+csv],{type:'text/csv;charset=utf-8'})
+  var url=URL.createObjectURL(blob),a=document.createElement('a')
+  a.href=url;a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url)
+}
+
+// ---- INIT ----
+renderRoomTabs();selectRoom(curRoom)
+;(function updateBadge(){
+  var pending=RS.filter(function(r){return MANAGER_ROOMS.indexOf(r.location)>=0&&r.status==='pending_review'})
+  document.getElementById('tabBadge').style.display=pending.length?'block':'none';document.getElementById('tabBadge').textContent=pending.length
+  setTimeout(updateBadge,10000)
+})()
+</script>
+</body>
+</html>
