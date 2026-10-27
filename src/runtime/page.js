@@ -1,5 +1,6 @@
 import {markRaw} from 'vue'
 import NativeNode from '../components/NativeNode.vue'
+import {persistSelectedMedia} from './media.js'
 import {guard,session,hasRole,switchRole,logout,changePassword,safeReLaunch} from '../services/auth.js'
 export function nativePage(factory,rules,role,kind=role){
  return {components:{NativeNode},data:()=>({tree:null,failed:'',loading:true,safeTop:0}),
@@ -19,7 +20,9 @@ export function nativePage(factory,rules,role,kind=role){
      backToTeacher:()=>uni.navigateBack({fail:()=>uni.reLaunch({url:'/packages/teacher/index'})}),
      password:async(oldPassword,password,confirm)=>{try{await changePassword(oldPassword,password,confirm);safeReLaunch('/pages/login/index')}catch(e){host.alert(e.message)}},
      storage:{get:k=>uni.getStorageSync(`prototype:${session.user.id}:${kind}:${k}`),set:(k,v)=>uni.setStorageSync(`prototype:${session.user.id}:${kind}:${k}`,v),remove:k=>uni.removeStorageSync(`prototype:${session.user.id}:${kind}:${k}`)},
-     chooseFiles:()=>new Promise(resolve=>uni.chooseMedia({count:6,mediaType:['image','video'],success:r=>resolve(r.tempFiles.map(f=>({...f,path:f.tempFilePath,name:f.tempFilePath.split('/').pop(),type:f.fileType==='video'?'video/mp4':'image/jpeg'}))),fail:()=>resolve([])})),
+     chooseFiles:()=>new Promise(resolve=>uni.chooseMedia({count:6,mediaType:['image','video'],success:async r=>{
+      try{resolve(await persistSelectedMedia(r.tempFiles))}catch(e){host.alert(e.message);resolve([])}
+     },fail:()=>resolve([])})),
      datePicker:el=>{uni.showModal({title:'选择日期',editable:true,placeholderText:'YYYY-MM-DD',success:r=>{if(r.confirm&&/^\d{4}-\d{2}-\d{2}$/.test(r.content)){el.value=r.content;const fn=this._runtime.scope.get('renderOrderList');if(typeof fn==='function')fn();this.paint()}}})},
      openLink:(url,name)=>{if(url?.parts){this.exportFile(name||'记录.csv',url.parts.join(''));return}if(!url||url==='#'||String(url).endsWith('/#'))return host.alert('原演示尚未配置资源文件，请在接入真实资源后使用。');if(/^https:\/\//.test(url))uni.downloadFile({url,success:r=>uni.openDocument({filePath:r.tempFilePath,showMenu:true}),fail:()=>host.alert('资源下载失败')})}
     }
@@ -32,7 +35,7 @@ export function nativePage(factory,rules,role,kind=role){
    },
    paint(){if(!this._runtime)return;try{this.decorate();this.tree=this._runtime.snapshot(rules);const fix=n=>{if(n.style)n.style=n.style.replace(/100vh/g,`calc(100vh - ${this.safeTop}px)`);n.children?.forEach(fix)};fix(this.tree)}catch(e){this.fail(e)}},
    async action(e){if(!this._runtime)return;await this._runtime.dispatch(e);this.paint();this.saveState()},
-   saveState(){if(!this._runtime||!session.user)return;const fields=kind==='student'?['pickupDevices','pendingApprovals','pendingReserveApprovals','faultList','messages','examAttemptsMap','safetyExamStatusMap','rfidExamStatusMap','systemDone']:kind==='teacher'?['organizationMembers','organizationApplications','minimumCategories','exceptionManagementRecords']:['RS','MGS','CS'];const state={};for(const k of fields){const v=this._runtime.scope.get(k);if(v!==undefined)try{state[k]=JSON.parse(JSON.stringify(v))}catch{}}uni.setStorageSync(`state:${session.user.id}:${kind}`,state)},
+   saveState(){if(!this._runtime||!session.user)return;const fields=kind==='student'?['pickupDevices','pendingApprovals','pendingReserveApprovals','deviceOrderData','memoryReservations','faultList','messages','examAttemptsMap','safetyExamStatusMap','rfidExamStatusMap','systemDone']:kind==='teacher'?['organizationMembers','organizationApplications','minimumCategories','exceptionManagementRecords']:['RS','MGS','CS'];const state={};for(const k of fields){const v=this._runtime.scope.get(k);if(v!==undefined)try{state[k]=JSON.parse(JSON.stringify(v))}catch{}}uni.setStorageSync(`state:${session.user.id}:${kind}`,state)},
    restoreState(){const state=uni.getStorageSync(`state:${session.user.id}:${kind}`)||{};for(const [k,v]of Object.entries(state)){const original=this._runtime.scope.get(k);if(Array.isArray(original)&&Array.isArray(v))original.splice(0,original.length,...v);else if(original&&typeof original==='object')Object.assign(original,v);else try{this._runtime.scope.set(k,v)}catch{}}const fn=this._runtime.scope.get(role==='student'?'show':kind==='teacher'?'openPage':'goTab');if(typeof fn==='function')fn(role==='student'?'home':kind==='teacher'?'role-admin-home':0)},
    exportFile(name,text){
     // #ifdef MP-WEIXIN

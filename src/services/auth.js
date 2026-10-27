@@ -5,7 +5,8 @@ const DB = 'cabinet.demo.accounts.v1'
 let navigationBusy = false
 const demoResetCodes = new Map()
 const DEMO_RESET_CODE = '123456'
-const isDemoLoginId = value => /^(000001|000002|000003)$/.test(String(value))
+const DEMO_PHONES = { 'demo-student':'13800000001', 'demo-teacher':'13800000002', 'demo-approver':'13800000003' }
+const SHORT_DEMO_ACCOUNTS = ['000001', '000002', '000003', '00003']
 export function safeReLaunch(url) {
   if (navigationBusy) return false
   navigationBusy = true
@@ -22,42 +23,43 @@ export function request(path, data, method = 'GET') {
     success: r => { if (r.statusCode === 401) clearSession(); r.statusCode >= 200 && r.statusCode < 300 ? resolve(r.data) : reject(new Error(r.data?.message || '请求失败')) }, fail: () => reject(new Error('无法连接服务，请检查服务地址与网络')) }))
 }
 function demoAccounts() {
-  const demo = [
-    { id:'demo-student', phone:'000001', password:'123456', name:'张三', personType:'student', roles:['student'] },
-    { id:'demo-teacher', phone:'000002', password:'123456', name:'王明', personType:'teacher', roles:['student','teacher'], teacherPermission:'admin' },
-    { id:'demo-approver', phone:'000003', password:'123456', name:'陈思远', personType:'teacher', roles:['student','teacher'], teacherPermission:'approver' }
-  ]
   const existing = uni.getStorageSync(DB)
   if (Array.isArray(existing)) {
     let changed = false
     for (const account of existing) {
-      const preset = demo.find(item => item.id === account.id)
-      if (preset && (account.phone !== preset.phone || account.password === 'Demo12345')) {
-        Object.assign(account, preset); changed = true
+      if (!account.personType) {
+        account.personType = account.id === 'demo-teacher' ? 'teacher' : 'student'
+        changed = true
       }
-      if (!account.personType) { account.personType = account.teacherPermission ? 'teacher' : 'student'; changed = true }
+      const demoPhone = DEMO_PHONES[account.id]
+      if (demoPhone && account.credentialVersion !== 2) {
+        if (SHORT_DEMO_ACCOUNTS.includes(account.phone)) account.phone = demoPhone
+        if (account.password === 'Demo12345' || String(account.password || '').length < 8) account.password = '12345678'
+        delete account.aliases
+        delete account.legacyPhone
+        account.credentialVersion = 2
+        changed = true
+      }
     }
     if (changed) uni.setStorageSync(DB, existing)
     return existing
   }
-  uni.setStorageSync(DB, demo)
-  return demo
+  const records = [{ id:'demo-student', phone:'13800000001', password:'12345678', credentialVersion:2, name:'张三', personType:'student', roles:['student'] },
+    { id:'demo-teacher', phone:'13800000002', password:'12345678', credentialVersion:2, name:'王明', personType:'teacher', roles:['student','teacher'], teacherPermission:'admin' },
+    { id:'demo-approver', phone:'13800000003', password:'12345678', credentialVersion:2, name:'陈思远', personType:'student', roles:['student','teacher'], teacherPermission:'approver' }]
+  uni.setStorageSync(DB, records); return records
 }
 function publicUser(u) { const { password, ...user } = u; return user }
 export async function login(phone, password, register = false, name = '') {
-  const demoId = /^(000001|000002|000003)$/.test(phone)
-  if (register || config.mode === 'api') {
-    if (!/^1\d{10}$/.test(phone)) throw new Error('请输入11位手机号')
-    if (typeof password !== 'string' || password.length < 8 || password.length > 64) throw new Error('密码须为8至64位')
-  } else if (!demoId) {
-    if (!/^1\d{10}$/.test(phone)) throw new Error('请输入演示账号或11位手机号')
-    if (typeof password !== 'string' || password.length < 6 || password.length > 64) throw new Error('密码须为6至64位')
-  }
+  const accountId = String(phone || '').trim()
+  if (!/^1\d{10}$/.test(accountId)) throw new Error('请输入11位手机号')
+  if (typeof password !== 'string' || password.length < 8 || password.length > 64) throw new Error('密码须为8至64位')
   let result
-  if (config.mode === 'api') result = await request(register ? '/auth/register' : '/auth/login', { phone, password, name }, 'POST')
+  if (config.mode === 'api') result = await request(register ? '/auth/register' : '/auth/login', { phone: accountId, password, name }, 'POST')
   else {
-    const accounts = demoAccounts(); let user = accounts.find(a => a.phone === phone)
-    if (register) { if (user) throw new Error('该手机号已注册'); user = { id:'user-'+Date.now(), phone, password, name:name || '新用户', personType:'student', roles:['student'] }; accounts.push(user); uni.setStorageSync(DB, accounts) }
+    const accounts = demoAccounts()
+    let user = accounts.find(a => a.phone === accountId)
+    if (register) { if (user) throw new Error('该手机号已注册'); user = { id:'user-'+Date.now(), phone:accountId, password, name:name || '新用户', personType:'student', roles:['student'] }; accounts.push(user); uni.setStorageSync(DB, accounts) }
     if (!user || user.password !== password) throw new Error('手机号或密码错误')
     result = { token:'demo:'+user.id, user:publicUser(user) }
   }
@@ -111,7 +113,7 @@ export async function changePassword(oldPassword, password, confirm) {
   clearSession()
 }
 export async function requestPasswordResetCode(phone) {
-  if (!isDemoLoginId(phone) && !/^1\d{10}$/.test(phone)) throw new Error('请输入演示账号或11位手机号')
+  if (!/^1\d{10}$/.test(phone)) throw new Error('请输入11位手机号')
   if (config.mode === 'api') return request('/auth/password-reset/request', { phone }, 'POST')
   const now = Date.now()
   const previous = demoResetCodes.get(phone)
@@ -120,7 +122,7 @@ export async function requestPasswordResetCode(phone) {
   return { demoCode: DEMO_RESET_CODE }
 }
 export async function resetPassword(phone, code, password, confirm) {
-  if (!isDemoLoginId(phone) && !/^1\d{10}$/.test(phone)) throw new Error('请输入演示账号或11位手机号')
+  if (!/^1\d{10}$/.test(phone)) throw new Error('请输入11位手机号')
   validateNewPassword(password)
   if (password !== confirm) throw new Error('两次输入的新密码不一致')
   if (config.mode === 'api') await request('/auth/password-reset/confirm', { phone, code, password }, 'POST')
@@ -138,3 +140,4 @@ export async function resetPassword(phone, code, password, confirm) {
   }
   clearSession()
 }
+

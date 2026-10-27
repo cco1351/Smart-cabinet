@@ -2,7 +2,7 @@ import {chromium} from '@playwright/test'
 const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'})
 const page=await browser.newPage({viewport:{width:390,height:844}})
 const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())})
-async function login(phone){await page.goto('http://127.0.0.1:5173/#/pages/login/index');await page.locator('input').first().fill(phone);await page.locator('input').nth(1).fill('Demo12345');await page.getByText('登录',{exact:true}).last().click();await page.getByText('设备预约',{exact:true}).waitFor()}
+async function login(phone){await page.goto('http://127.0.0.1:5173/#/pages/login/index');await page.locator('input').first().fill(phone);await page.locator('input').nth(1).fill('12345678');await page.getByText('登录',{exact:true}).last().click();await page.getByText('设备预约',{exact:true}).waitFor()}
 async function teacher(){await page.getByText('我的',{exact:true}).click();await page.getByText('切换为教师',{exact:true}).click();await page.getByText('管理首页',{exact:true}).waitFor()}
 try{
  await login('13800000001');await page.getByText('我的',{exact:true}).click();if(await page.getByText('切换为教师',{exact:true}).count())throw Error('学生不应出现教师切换入口')

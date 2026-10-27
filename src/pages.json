@@ -6,7 +6,7 @@
   ],
   "subPackages": [
     {"root":"packages/student","pages":[{"path":"index","style":{"navigationStyle":"custom","disableScroll":true}}]},
-    {"root":"packages/teacher","pages":[{"path":"index","style":{"navigationStyle":"custom","disableScroll":true}},{"path":"power-admin","style":{"navigationStyle":"custom"}},{"path":"power-approver","style":{"navigationStyle":"custom"}}]}
+    {"root":"packages/teacher","pages":[{"path":"index","style":{"navigationStyle":"custom","disableScroll":true}},{"path":"power-admin","style":{"navigationStyle":"custom","disableScroll":true}},{"path":"power-approver","style":{"navigationStyle":"custom","disableScroll":true}}]}
   ],
   "globalStyle":{"navigationBarTextStyle":"black","navigationBarBackgroundColor":"#ffffff","backgroundColor":"#f4f6fb","usingComponents":{"native-node":"/components/NativeNode"}}
 }

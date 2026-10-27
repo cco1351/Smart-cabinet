@@ -1,2 +1,2 @@
-<template><view :style="{paddingTop:safeTop+'px'}"><view v-if="failed">{{failed}}</view><NativeNode v-if="tree" :node="tree" @action="action"/></view></template>
-<script>import NativeNode from '../../components/NativeNode.vue';import {nativePage} from '../../runtime/page.js';import {createPrototype} from './powerApprover.js';import rules from './powerApprover.styles.json';export default {...nativePage(createPrototype,rules,'teacher','powerApprover'),components:{NativeNode}}</script>
+<template><view :style="{paddingTop:safeTop+'px'}"><view v-if="failed">{{failed}}</view><PowerNode v-if="tree" :node="tree" @action="action"/></view></template>
+<script>import PowerNode from './PowerNode.vue';import {powerPage} from './power-page.js';import {createPrototype} from './powerApprover.js';import rules from './powerApprover.styles.json';export default {...powerPage(createPrototype,rules,'powerApprover'),components:{PowerNode}}</script>

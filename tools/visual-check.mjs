@@ -7,7 +7,7 @@ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console'
 try{
  await page.goto('http://127.0.0.1:5173/');await page.locator('input').first().waitFor()
  await page.screenshot({path:'docs/screenshots/login.png',fullPage:true})
- await page.locator('input').nth(0).fill('13800000002');await page.locator('input').nth(1).fill('Demo12345');await page.getByText('登录',{exact:true}).last().click()
+ await page.locator('input').nth(0).fill('13800000002');await page.locator('input').nth(1).fill('12345678');await page.getByText('登录',{exact:true}).last().click()
  await page.getByText('设备预约',{exact:true}).waitFor({timeout:30000});await page.screenshot({path:'docs/screenshots/student-home.png',fullPage:true})
  await page.getByText('设备预约',{exact:true}).click();await page.locator('input').first().waitFor();await page.screenshot({path:'docs/screenshots/student-devices.png',fullPage:true})
  await page.getByText('我的',{exact:true}).click();await page.getByText('切换为教师',{exact:true}).waitFor();await page.screenshot({path:'docs/screenshots/student-profile.png',fullPage:true})

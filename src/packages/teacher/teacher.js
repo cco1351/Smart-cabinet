@@ -1,4 +1,5 @@
 import {createEnvironment} from '../../runtime/environment.js';
+import {generateDemoAccessCode} from '../../runtime/access-code.js';
 export function createPrototype(host){const env=createEnvironment("<!doctype html>\n<html lang=\"zh-CN\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>小程序管理端页面原型线框图</title>\n  <link rel=\"stylesheet\" href=\"./css/小程序管理员端页面线框图.css\">\n</head>\n<body>\n  <div class=\"workspace\">\n    <div class=\"toolbar\">\n      <div class=\"toolbar-title\">\n        <strong>小程序管理端页面线框图</strong>\n        <span>同一小程序按登录角色展示不同功能入口。</span>\n      </div>\n      <div id=\"roleSwitch\" class=\"role-strip\"></div>\n    </div>\n    <main class=\"prototype-main\">\n      <div id=\"roleSummary\" class=\"role-summary\"></div>\n      <div id=\"pageTabs\" class=\"page-strip\"></div>\n      <div id=\"appFrame\"></div>\n    </main>\n  </div>\n  \n  \n  \n</body>\n</html>\n",host);const {document,window,location,URL,URLSearchParams,localStorage,sessionStorage,setTimeout,setInterval,clearTimeout,clearInterval,alert,confirm,FileReader,Blob}=env.globals;const history=env.globals.history;
 const navs = [
       ["首页", "H"], ["待办", "T"], ["设备", "D"], ["柜机", "C"], ["个人", "P"]
@@ -646,7 +647,7 @@ const navs = [
         id: "07-order-detail", title: "订单详情",
         blocks: [
           { type: "panel", title: "订单 ORD-20260608-001", meta: ["状态：借用中", "借用人：张三", "设备：数字示波器 x1", "识别方式：标签扫码 | 需要审批", "柜位：C 柜 03 门"] },
-          { type: "timeline", title: "流程节点", steps: ["提交标签版借用申请", "审批人审批通过", "订单进入待取用并生成取出码", "柜机终端扫码、识别设备并同步借用结果"] },
+          { type: "timeline", title: "流程节点", steps: ["提交标签版借用申请", "审批人审批通过", "订单进入待取用并显示数字取件码", "柜机终端核验数字码、识别设备并同步借用结果"] },
           { type: "panel", title: "备注与异常", meta: ["审批备注展示区", "异常记录为空时只显示占位状态"] },
           { type: "btnline", buttons: [{ label: "添加备注" }, { label: "手动关闭订单" }] }
         ]
@@ -780,7 +781,7 @@ const navs = [
         ]
       },
       {
-        id: "09-device-detail", title: "设备详情", detailUi: true, actionsBottom: [{ label: "编辑设备", target: "09a-edit-device" }, { label: "标记异常", target: "18-device-exception-report", className: "danger" }, { label: "取出/归还码", target: "12-device-qr" }],
+        id: "09-device-detail", title: "设备详情", detailUi: true, actionsBottom: [{ label: "编辑设备", target: "09a-edit-device" }, { label: "标记异常", target: "18-device-exception-report", className: "danger" }, { label: "取件/归还码", target: "12-device-qr" }],
         blocks: [
           { type: "deviceHero", icon: "示", eyebrow: "电子测量仪器", title: "数字示波器", code: "OSC-001", state: "借用中", stateClass: "warn", tags: ["标签扫码", "C 柜 · 03 门"], metrics: [{ value: "168 小时", label: "最长时长" }, { value: "需要审批", label: "当前规则" }, { value: "张三", label: "借用人" }] },
           { type: "deviceInfo", icon: "档", title: "设备档案", rows: [["规格型号", "DS1054Z"], ["设备序列号", "SN-DS1054Z-001"], ["设备来源", "采购"], ["购入日期", "2025-09-01"]] },
@@ -802,7 +803,7 @@ const navs = [
         ]
       },
       {
-        id: "09c-label-direct-device-detail", title: "设备详情", detailUi: true, actionsBottom: [{ label: "编辑设备", target: "09a-edit-device" }, { label: "标记异常", target: "18-device-exception-report", className: "danger" }, { label: "取出/归还码", target: "12-device-qr-direct" }],
+        id: "09c-label-direct-device-detail", title: "设备详情", detailUi: true, actionsBottom: [{ label: "编辑设备", target: "09a-edit-device" }, { label: "标记异常", target: "18-device-exception-report", className: "danger" }, { label: "取件/归还码", target: "12-device-qr-direct" }],
         blocks: [
           { type: "deviceHero", icon: "表", eyebrow: "电子测量仪器", title: "数字万用表", code: "MET-016", state: "可借", tags: ["标签扫码", "C 柜 · 05 门"], metrics: [{ value: "168 小时", label: "最长时长" }, { value: "免审批", label: "当前规则" }, { value: "在柜", label: "设备状态" }] },
           { type: "deviceInfo", icon: "档", title: "设备档案", rows: [["规格型号", "UT61E+"], ["设备序列号", "SN-UT61E-016"], ["设备来源", "采购"], ["购入日期", "2025-09-03"]] },
@@ -1019,21 +1020,21 @@ const navs = [
         ]
       },
       {
-        id: "12-device-qr", title: "标签版取还码", actionsBottom: ["取消", "生成二维码"],
+        id: "12-device-qr", title: "标签版取还码", actionsBottom: [{ label: "返回设备详情", target: "09-device-detail" }],
         blocks: [
-          { type: "panel", title: "设备授权", meta: ["设备：数字示波器 OSC-001", "设备识别方式：标签扫码", "借用规则：需要审批 | 当前审批：已通过", "柜机/格位：C 柜 03 门", "授权类型：取出码 / 归还码", "有效时间：15 分钟"] },
-          { type: "form", rows: [["二维码类型", "取出码 / 归还码"], ["使用方式", "到柜机终端扫码"], ["开柜执行端", "柜机终端"], ["小程序权限", "只生成授权码，不直接开柜"]] },
-          { type: "qrcode", title: "标签版设备取出 / 归还二维码", text: "终端扫码校验授权后进入对应设备的现场取还流程。" },
-          { type: "panel", title: "操作说明", meta: ["需要审批的标签设备仅在审批通过后生成取用码", "不需要审批的标签设备在资格校验通过后直接生成取用码", "RFID 设备不显示本页面", "柜机终端完成扫码、开柜、标签识别、关门确认和状态同步"] }
+          { type: "panel", title: "设备授权", meta: ["设备：数字示波器 OSC-001", "设备识别方式：标签扫码", "借用规则：需要审批 | 当前审批：已通过", "柜机/格位：C 柜 03 门", "授权类型：取件码 / 归还码", "码格式：4 位数字"] },
+          { type: "form", rows: [["数字码类型", "取件码 / 归还码"], ["使用方式", "到柜机终端输入数字码"], ["开柜执行端", "柜机终端"], ["小程序权限", "只展示取还码，不直接开柜"]] },
+          { type: "accessCodes", name: "数字示波器", cabinet: "C 柜", title: "设备取件 / 归还数字码", text: "在柜机终端输入对应数字码，核验后进入现场取还流程。" },
+          { type: "panel", title: "操作说明", meta: ["需要审批的标签设备仅在审批通过后显示取件码", "不需要审批的标签设备在资格校验通过后显示取件码", "RFID 设备不显示本页面", "柜机终端完成数字码核验、开柜、标签识别、关门确认和状态同步"] }
         ]
       },
       {
-        id: "12-device-qr-direct", title: "标签版取还码", actionsBottom: ["取消", "生成二维码"],
+        id: "12-device-qr-direct", title: "标签版取还码", actionsBottom: [{ label: "返回设备详情", target: "09c-label-direct-device-detail" }],
         blocks: [
-          { type: "panel", title: "设备授权", meta: ["设备：数字万用表 MET-016", "设备识别方式：标签扫码", "借用规则：不需要审批 | 资格校验：已通过", "柜机/格位：C 柜 05 门", "授权类型：取出码 / 归还码", "有效时间：15 分钟"] },
-          { type: "form", rows: [["二维码类型", "取出码 / 归还码"], ["使用方式", "到柜机终端扫码"], ["审批任务", "不生成"], ["小程序权限", "只生成授权码，不直接开柜"]] },
-          { type: "qrcode", title: "标签版设备取出 / 归还二维码", text: "资格校验通过后直接生成，终端扫码后进入现场取还流程。" },
-          { type: "panel", title: "操作说明", meta: ["该设备配置为不需要借用审核", "资格校验通过后直接进入待取用并允许生成取用码", "归还结果按最小分类的归还审核规则执行"] }
+          { type: "panel", title: "设备授权", meta: ["设备：数字万用表 MET-016", "设备识别方式：标签扫码", "借用规则：不需要审批 | 资格校验：已通过", "柜机/格位：C 柜 05 门", "授权类型：取件码 / 归还码", "码格式：4 位数字"] },
+          { type: "form", rows: [["数字码类型", "取件码 / 归还码"], ["使用方式", "到柜机终端输入数字码"], ["审批任务", "不生成"], ["小程序权限", "只展示取还码，不直接开柜"]] },
+          { type: "accessCodes", name: "数字万用表", cabinet: "C 柜", title: "设备取件 / 归还数字码", text: "资格校验通过后显示取件码，在柜机终端输入对应数字码。" },
+          { type: "panel", title: "操作说明", meta: ["该设备配置为不需要借用审核", "资格校验通过后直接进入待取用并显示取件码", "归还结果以柜机终端识别和门磁结果为准"] }
         ]
       },
       {
@@ -1231,7 +1232,7 @@ const navs = [
       "11b-label-cabinet-detail": "页面说明：B 柜标签版异常详情，顶部横向展示每 10 个格口分组，点击分组后在下方显示对应设备列表；底部“处理异常”进入统一异常详情完成恢复。",
       "11c-label-cabinet-detail": "页面说明：C 柜标签版详情，顶部横向展示每 10 个格口分组，点击分组后在下方显示对应设备列表。",
       "12-device-qr": "页面说明：标签版取还码页，需要审批的设备通过后才能生成取用码，不需要审批的设备通过资格校验后可直接生成；RFID 不显示本页。",
-      "12-device-qr-direct": "页面说明：免借用审核标签设备取还码页，资格校验通过后直接生成取用码；归还按最小分类规则执行。",
+      "12-device-qr-direct": "页面说明：免借用审核标签设备取还码页，资格校验通过后直接生成取用码；归还结果以柜机终端识别和门磁结果为准。",
       "16a-edit-approver": "页面说明：从组织成员详情设置审批人或修改审批范围；借用、归还和异常审批权限自动拥有，页面只选择负责的最小分类；未选择时按钮显示全选，选择任意分类后切换为取消选择。",
       "17-admin-exception-process": "页面说明：异常处理与当前异常对象合并展示，支持日期范围、待通过、待处理、已恢复、已驳回状态及设备、柜机分类；待通过卡片默认支持单条通过、驳回，点击“批量管理”后才显示勾选框和底部批量操作栏，卡片点击改为选择或取消选择。",
       "18-device-exception-report": "页面说明：从设备详情标记异常，先选择设备损坏、设备缺失或放错柜位，再填写说明并提交异常记录。",
@@ -1271,13 +1272,15 @@ const navs = [
         powerModule: { level: "一级管理员", scope: "全部实验室", target: "../admin-demo.html" },
         homePage: {
           id: "role-admin-home", title: "管理首页", nav: "首页", noBack: true,
-          actions: [{ label: "电源管理", powerManagement: true }],
           blocks: [
             { type: "panel", className: "admin-home-overview", title: "今日运行概览", badge: "实时", meta: [
               { label: "待审批数", value: adminHomeDashboard.overview.pendingApprovalCount },
               { label: "已审批数", value: adminHomeDashboard.overview.approvedCount },
               { label: "在库设备数", value: adminHomeDashboard.overview.inStockDeviceCount },
               { label: "已借出设备数量", value: adminHomeDashboard.overview.borrowedDeviceCount }
+            ] },
+            { type: "list", className: "admin-home-power", items: [
+              { title: "电源管理", powerManagement: true, meta: ["切换至实验室电源管理"] }
             ] },
             { type: "list", className: "admin-home-tasks", title: "待处理任务", items: [
               { title: "借用审核", badge: `待处理 ${adminHomeDashboard.borrowApproval.pendingCount}`, badgeClass: "warn", meta: [{ label: "最新申请", value: `${adminHomeDashboard.borrowApproval.latestApplicant} · ${adminHomeDashboard.borrowApproval.latestDeviceName}` }], target: "03-admin-borrow-return" },
@@ -2025,8 +2028,25 @@ const navs = [
           { label: "最新申请", value: latestApplication ? `${latestApplication.name} · ${latestApplication.appliedAt}` : "暂无待审核申请" }
         ];
       }
-      const card = el("div", "card");
-      if (item.deviceDetailData) {
+      const card = el(item.powerManagement ? "button" : "div", "card");
+      if (item.powerManagement) {
+        const powerModule = roleConfigs[currentRole].powerModule;
+        card.type = "button";
+        card.classList.add("power-management-card");
+        card.disabled = !powerModule;
+        card.setAttribute("aria-label", powerModule ? `进入${powerModule.level}电源管理` : "当前账号无电源管理权限");
+        card.addEventListener("click", event => {
+          event.stopPropagation();
+          if (card.disabled) return;
+          card.disabled = true;
+          try {
+            openPowerManagement();
+          } finally {
+            // 分包返回后沿用当前首页实例，短暂防重后恢复入口。
+            setTimeout(() => { card.disabled = !roleConfigs[currentRole].powerModule; }, 300);
+          }
+        });
+      } else if (item.deviceDetailData) {
         card.classList.add("clickable");
         card.addEventListener("click", event => {
           event.stopPropagation();
@@ -2038,6 +2058,11 @@ const navs = [
       }
       const head = el("div", "row between");
       head.appendChild(el("div", "card-title", item.title));
+      if (item.powerManagement) {
+        const arrow = el("span", "power-management-arrow", "›");
+        arrow.setAttribute("aria-hidden", "true");
+        head.appendChild(arrow);
+      }
       const badges = item.badges || (item.badge ? [{ label: item.badge, badgeClass: item.badgeClass }] : []);
       if (badges.length) {
         const badgeGroup = el("div", "badge-group");
@@ -4815,14 +4840,19 @@ const navs = [
       if (block.type === "upload") {
         wrap.appendChild(el("div", "upload", block.text));
       }
-      if (block.type === "qrcode") {
-        const qr = el("div", "qr-preview");
-        const grid = el("div", "qr-grid");
-        for (let i = 0; i < 49; i += 1) grid.appendChild(el("span"));
-        qr.appendChild(grid);
-        qr.appendChild(el("strong", "", block.title || "设备取出/归还二维码"));
-        qr.appendChild(el("div", "small muted", block.text || "柜机终端扫码后完成开柜操作"));
-        wrap.appendChild(qr);
+      if (block.type === "accessCodes") {
+        const codes = el("div", "access-code-list");
+        [["取件码", "领取"], ["归还码", "归还"]].forEach(([label, type]) => {
+          const row = el("div", "access-code-row");
+          row.setAttribute("style", "display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:14px;background:#f5f7ff;border:1px solid #e0e7ff;border-radius:12px");
+          row.appendChild(el("span", "", label));
+          const value = el("span", "access-code", generateDemoAccessCode(type, block.name, block.cabinet));
+          value.setAttribute("style", "font-size:28px;font-weight:700;letter-spacing:4px;color:#4f46e5");
+          row.appendChild(value);
+          codes.appendChild(row);
+        });
+        codes.appendChild(el("div", "small muted", block.text));
+        wrap.appendChild(codes);
       }
       if (block.type === "btnline") {
         const btns = el("div", "btns");
@@ -4937,17 +4967,8 @@ const navs = [
       top.appendChild(el("div", "title", page.title));
       if (page.actions) page.actions.forEach(action => {
         const data = typeof action === "string" ? { label: action } : action;
-        const tiny = el(data.powerManagement ? "button" : "div", "tiny" + (data.powerManagement ? " power-management-switch" : ""), data.powerManagement ? `<span aria-hidden="true">电</span><strong>${data.label}</strong>` : data.label);
-        if (data.powerManagement) {
-          tiny.type = "button";
-          tiny.setAttribute("aria-label", `进入${roleConfigs[currentRole].powerModule.level}电源管理`);
-          tiny.addEventListener("click", event => {
-            event.stopPropagation();
-            openPowerManagement();
-          });
-        } else {
-          makeClickable(tiny, data.target);
-        }
+        const tiny = el("div", "tiny", data.label);
+        makeClickable(tiny, data.target);
         top.appendChild(tiny);
       });
       phone.appendChild(top);
